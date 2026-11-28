@@ -15,12 +15,13 @@ passing locally; **run on target** = executed on the Raspberry Pi 4 / labwc.
 | Step 1a reason bitmask (`51cd2c16`) | yes | yes (40/40, new `suspend_reasons` test) | yes | **not run** |
 | Step 1b `IsVsyncParked`/`CanParkVsync` (`40b330e9`) | yes | yes (40/40) | yes | **not run** |
 | Step 1c `hide`/`show` channel (`baa42561`) | yes | yes (40/40) | yes | **not run** |
+| Step 1.5 `diag:` hide probe (`775400db`, dropped before export) | yes | yes (40/40, probe inert without env) | yes | **not run** |
 | Step 2 present gate | not started | — | — | — |
 | Step 3 foreign-toplevel minimize | not started | — | — | — |
 | Step 4 drain | not started | — | — | — |
 | Step 5 watchdog interaction | not started | — | — | — |
 | Step 6 lifecycle messages | not started | — | — | — |
-| Step 7 Dart side | not started | — | — | — |
+| Step 7 Dart side (sigg_launcher) | n/a (Dart) | yes (`window_service_test.dart`, 8 cases) | n/a | **not run** |
 | Step 8 diagnostics | not started | — | — | — |
 
 ### Not verified, and why
