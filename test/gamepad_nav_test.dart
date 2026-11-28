@@ -178,6 +178,48 @@ void main() {
     );
   });
 
+  testWidgets('d-pad drives the power dialog and A/B confirm or close it', (
+    tester,
+  ) async {
+    final ctrl = StreamController<GamepadEvent>.broadcast();
+    addTearDown(ctrl.close);
+    await _pumpLibrary(tester, ctrl.stream);
+
+    // The power action is the last header item.
+    await _tap(tester, ctrl, GamepadButton.dpadUp);
+    for (var i = 0; i < 4; i++) {
+      await _tap(tester, ctrl, GamepadButton.dpadRight);
+    }
+    expect(NavController.instance.headerIndex, 4);
+
+    await _tap(tester, ctrl, GamepadButton.a);
+    expect(find.text('O que você gostaria de fazer?'), findsOneWidget);
+
+    // The dialog owns a focus controller; "Fechar" (last) starts focused.
+    final dialogNav = PageFocusHub.instance.active;
+    expect(dialogNav, isNotNull);
+    expect(dialogNav!.index, 2);
+
+    await _tap(tester, ctrl, GamepadButton.dpadLeft);
+    expect(PageFocusHub.instance.active!.index, 1);
+    await _tap(tester, ctrl, GamepadButton.dpadLeft);
+    expect(PageFocusHub.instance.active!.index, 0);
+    await _tap(tester, ctrl, GamepadButton.dpadRight);
+    expect(PageFocusHub.instance.active!.index, 1);
+
+    // A on "Reiniciar" closes the dialog; test sessions never touch the host.
+    await _tap(tester, ctrl, GamepadButton.a);
+    expect(find.text('O que você gostaria de fazer?'), findsNothing);
+    expect(PageFocusHub.instance.active, isNull);
+    expect(LauncherRouteObserver.instance.isHomeTop, isTrue);
+
+    // Reopen and close with B.
+    await _tap(tester, ctrl, GamepadButton.a);
+    expect(find.text('O que você gostaria de fazer?'), findsOneWidget);
+    await _tap(tester, ctrl, GamepadButton.b);
+    expect(find.text('O que você gostaria de fazer?'), findsNothing);
+  });
+
   testWidgets('gamepad input is ignored while a game is running', (
     tester,
   ) async {

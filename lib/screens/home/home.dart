@@ -12,6 +12,7 @@ import 'package:sigg_launcher/screens/home/widgets/games_row.dart';
 import 'package:sigg_launcher/screens/home/widgets/header.dart';
 import 'package:sigg_launcher/screens/home/widgets/hero_banner.dart';
 import 'package:sigg_launcher/screens/home/widgets/mock_games.dart';
+import 'package:sigg_launcher/screens/home/widgets/power_dialog.dart';
 import 'package:sigg_launcher/screens/home/widgets/user_switcher.dart';
 import 'package:sigg_launcher/services/achievement_service.dart';
 import 'package:sigg_launcher/services/bgm_player.dart';
@@ -23,6 +24,7 @@ import 'package:sigg_launcher/services/image_cache.dart';
 import 'package:sigg_launcher/services/nav_controller.dart';
 import 'package:sigg_launcher/services/page_nav_controller.dart';
 import 'package:sigg_launcher/services/software_registry.dart';
+import 'package:sigg_launcher/services/system_service.dart';
 
 const double _gamesSectionMinHeight = 240;
 
@@ -321,6 +323,9 @@ class _LibraryState extends State<Library> {
       case 3:
         _openPage(const SettingsPage());
         break;
+      case 4:
+        _showPowerDialog();
+        break;
     }
   }
 
@@ -331,6 +336,37 @@ class _LibraryState extends State<Library> {
 
   void _openLibrary() {
     _openPage(LibraryPage(games: Future.value(_gamesList)));
+  }
+
+  /// Shutdown/reboot confirmation dialog opened from the power button.
+  ///
+  /// The dialog registers its own [PageNavController] on [PageFocusHub] (like
+  /// a pushed sub-page), so gamepad/keyboard input routes to its buttons
+  /// instead of leaking into the home shell — hence no [PageFocusHub.suspend]
+  /// here. Debug and test sessions never reach the host (see [SystemService]).
+  Future<void> _showPowerDialog() async {
+    final choice = await showDialog<PowerAction>(
+      context: context,
+      builder: (context) => const PowerDialog(),
+    );
+    if (choice == null) return;
+    // Debug/test sessions never reach the host.
+    if (SystemService.instance.isSafeSession) return;
+    final ok = await SystemService.instance.request(
+      choice == PowerAction.shutdown
+          ? PowerRequest.powerOff
+          : PowerRequest.reboot,
+    );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível desligar ou reiniciar o sistema.'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+    }
   }
 
   List<GameEntry> _snapshotData() => _gamesList;
@@ -465,6 +501,10 @@ class _LibraryState extends State<Library> {
                                     onSettingsTap: () {
                                       NavController.instance.focusHeaderItem(3);
                                       _openPage(const SettingsPage());
+                                    },
+                                    onPowerTap: () async {
+                                      NavController.instance.focusHeaderItem(4);
+                                      await _showPowerDialog();
                                     },
                                   );
                                 },

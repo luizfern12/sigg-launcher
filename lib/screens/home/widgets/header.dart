@@ -44,18 +44,20 @@ class Header extends StatefulWidget {
     this.onStoreTap,
     this.onTrophiesTap,
     this.onSettingsTap,
+    this.onPowerTap,
   });
 
   /// Whether the header is the active navigation zone.
   final bool active;
 
-  /// Index (0 = profile, 1 = store, 2 = trophies, 3 = settings) shown with a
-  /// focus ring when [active].
+  /// Index (0 = profile, 1 = store, 2 = trophies, 3 = settings,
+  /// 4 = power) shown with a focus ring when [active].
   final int focusedIndex;
 
   final VoidCallback? onStoreTap;
   final VoidCallback? onTrophiesTap;
   final VoidCallback? onSettingsTap;
+  final VoidCallback? onPowerTap;
 
   @override
   State<Header> createState() => _HeaderState();
@@ -67,6 +69,7 @@ class _HeaderState extends State<Header> with WidgetsBindingObserver {
     'IFSCstation Store',
     'Troféus',
     'Configurações',
+    'Desligar',
   ];
 
   final GlobalKey _stackKey = GlobalKey();
@@ -75,6 +78,7 @@ class _HeaderState extends State<Header> with WidgetsBindingObserver {
     1: GlobalKey(),
     2: GlobalKey(),
     3: GlobalKey(),
+    4: GlobalKey(),
   };
 
   Rect? _indicatorRect;
@@ -273,6 +277,12 @@ class _HeaderState extends State<Header> with WidgetsBindingObserver {
                         onPressed: widget.onSettingsTap,
                         icon: const Icon(Icons.settings, size: 32),
                         tooltip: "Configurações",
+                      ),
+                      IconButton(
+                        key: _itemKeys[4],
+                        onPressed: widget.onPowerTap,
+                        icon: const Icon(Icons.power_settings_new, size: 32),
+                        tooltip: "Desligar",
                       ),
 
                       const Spacer(),

@@ -213,4 +213,71 @@ void main() {
       reason: 'leaving the header zone must hide the tooltip',
     );
   });
+
+  testWidgets('the power button is the last header item and opens its dialog', (
+    tester,
+  ) async {
+    await pumpLibrary(tester);
+
+    await pressKey(tester, LogicalKeyboardKey.arrowUp);
+    expect(NavController.instance.headerIndex, 0);
+
+    for (var i = 0; i < 4; i++) {
+      await pressKey(tester, LogicalKeyboardKey.arrowRight);
+    }
+    expect(NavController.instance.headerIndex, 4);
+    expect(
+      find.text('Desligar'),
+      findsOneWidget,
+      reason: 'the power button must show its tooltip when focused',
+    );
+
+    await pressKey(tester, LogicalKeyboardKey.enter);
+    await settle(tester);
+
+    expect(
+      find.text('O que você gostaria de fazer?'),
+      findsOneWidget,
+      reason: 'Enter on the power button must open the shutdown dialog',
+    );
+
+    // Fechar closes the dialog; test sessions never reach the host.
+    await tester.tap(find.text('Fechar'));
+    await settle(tester);
+
+    expect(
+      find.text('O que você gostaria de fazer?'),
+      findsNothing,
+      reason: 'tapping Fechar must close the dialog',
+    );
+  });
+
+  testWidgets('Enter in the power dialog pops only the dialog, not home', (
+    tester,
+  ) async {
+    await pumpLibrary(tester);
+
+    await pressKey(tester, LogicalKeyboardKey.arrowUp);
+    for (var i = 0; i < 4; i++) {
+      await pressKey(tester, LogicalKeyboardKey.arrowRight);
+    }
+    await pressKey(tester, LogicalKeyboardKey.enter);
+    await settle(tester);
+    expect(find.text('O que você gostaria de fazer?'), findsOneWidget);
+
+    // Tab used to move native focus onto a dialog button; Enter then fired
+    // both the hub controller and the focused button's onPressed, popping the
+    // dialog AND the home route. The dialog keeps activation hub-only, so the
+    // same sequence must leave the home screen intact.
+    await pressKey(tester, LogicalKeyboardKey.tab);
+    await pressKey(tester, LogicalKeyboardKey.enter);
+    await settle(tester);
+
+    expect(find.text('O que você gostaria de fazer?'), findsNothing);
+    expect(
+      find.byType(Library),
+      findsOneWidget,
+      reason: 'the home route must survive the dialog pop',
+    );
+  });
 }

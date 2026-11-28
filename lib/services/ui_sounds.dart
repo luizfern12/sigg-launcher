@@ -116,7 +116,7 @@ class UiSounds {
   /// concurrent callers so rapid overlapping ticks trigger exactly one load.
   Future<int> _ensureTickSource() async {
     if (_tickSourceId != null) return _tickSourceId!;
-    _tickSourceLoadFuture ??= _engine.loadAsset('sfx/click.wav');
+    _tickSourceLoadFuture ??= _engine.loadAsset('assets/sfx/click.wav');
     final loadFuture = _tickSourceLoadFuture!;
     try {
       final sourceId = await loadFuture;

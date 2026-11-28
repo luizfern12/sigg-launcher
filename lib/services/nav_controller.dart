@@ -16,7 +16,7 @@ class NavController extends ChangeNotifier {
 
   static final NavController instance = NavController._();
 
-  static const int headerCount = 4;
+  static const int headerCount = 5;
 
   HomeSection _section = HomeSection.games;
   int _headerIndex = 0;

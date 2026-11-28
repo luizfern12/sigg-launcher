@@ -32,7 +32,7 @@ void main() {
     // One source load, six plays.
     expect(engine.loadCalls.length, equals(1));
     expect(engine.loadCalls.first.kind, 'asset');
-    expect(engine.loadCalls.first.path, 'sfx/click.wav');
+    expect(engine.loadCalls.first.path, 'assets/sfx/click.wav');
     expect(engine.playCalls.length, equals(6));
     expect(engine.playCalls.every((call) => call.volume == 1.0), isTrue);
   });
